@@ -4,7 +4,7 @@
 var unibinary=function(){var a=24064,b=28160,c=32256,d=36352,e=4096,f=19968,g=4096,h=1024,j=256,k=function(a,b){if(b>4095)throw new Error("ValueError");if(a>255)throw new Error("ValueError");var c=String.fromCharCode(h+a),d=String.fromCharCode(f+b);return c+d},l=function(e,f){var g=e,h=f,i=null;return g<64&&h<64?i=a:g<64&&h>=64?(h-=64,i=b):g>=64&&h<64?(g-=64,i=c):g>=64&&h>=64&&(g-=64,h-=64,i=d),String.fromCharCode(i+(g<<6)+h)},m=function(a){if(a>h+j)throw console.error("-- unichr_08_from_int: 0x"+a.toString(16)),new Error("ValueError");return String.fromCharCode(h+a)},n=function(a){if(a>f+g)throw console.error("-- unichr_12_from_int: 0x"+a.toString(16)),new Error("ValueError");return String.fromCharCode(f+a)},o=function(a){if(i=a.charCodeAt(0),i<h||i>h+j)throw console.error("-- int_from_u8: "+a.toString()),new Error("ValueError");return i-h},p=function(f){var j=null;i=f.charCodeAt(0);for(var l,k=0;l=[a,b,c,d][k];k++)i>=l&&i<l+e&&(j=l);if(!j)throw console.error("-- two_bytes_from_u12a ord=0x"+f.charCodeAt(0)),new Error("ValueError");var m=i-j,n=(4032&m)>>6,o=63&i;switch(j){case b:o+=64;break;case c:n+=64;break;case d:n+=64,o+=64}return[n,o]},q=function(a){var b=a.charCodeAt(0);if(b<f||b>f+g)throw console.error("-- int_from_u12b: "+a),new Error("ValueError");return b-f},r=function(a,b,c){if(a>255||b>255||c>255)throw new Error("ValueError");var d=(a<<4)+(b>>4),e=((15&b)<<8)+c;return[d,e]},s=function(a,b){if(a>4095||b>4095)throw new Error("ValueError");var c=a>>4,d=((15&a)<<4)+((3840&b)>>8),e=255&b;return[c,d,e]},t=function(a,b){for(var c=b,d=0,e=a[c];c<a.length&&a[c]==e;)d+=1,c+=1;return d},u=function(a,b){var c=q(a),d=q(b);return s(c,d)},v=function(a,b){for(var c=o(a),d=q(b),e=[],f=0;f<d;f++)e.push(c);return e},w=function(a,b){var c=o(a),d=o(b);return[c,d]},x=function(f){for(var i,g=f.charCodeAt(0),h=0;i=[a,b,c,d][h];h++)if(g>=i&&g<i+e)return!0;return!1},y=function(a){var b=a.charCodeAt(0);return b>=h&&b<h+j},z=function(a){var b=a.charCodeAt(0);return b>=f&&b<f+g},A=function(a,b){var c=z(a),d=z(b),e=y(a),f=y(b);if(c&&d)return u(a,b);if(e&&d)return v(a,b);if(e&&f)return w(a,b);throw console.error("--"+a+" "+b+" "+a.charCodeAt(0).toString(16)+" "+b.charCodeAt(0).toString(16)),new Error("ValueError")},B=function(a){for(var b=0,c="";b<a.length;){var d=t(a,b);if(d>=3)d>=4096&&(d=4095),c+=k(a[b],d),b+=d;else{var e=a.length>=b+2&&a[b]<128&&a[b+1]<128;if(e)c+=l(a[b],a[b+1]),b+=2;else if(a.length>=b+3){var f=r(a[b],a[b+1],a[b+2]);c+=n(f[0])+n(f[1]),b+=3}else c+=m(a[b]),b+=1}}return c},C=function(a){for(var b=0,c=0;b<a.length;)if("\n"!=a[b])if(x(a[b]))b+=1,c+=2;else if(b+1<a.length){var d=a[b];for(b+=1;"\n"==a[b];)b+=1;var e=a[b];b+=1,h=A(d,e),c+=h.length}else y(a[b])?(b+=1,c+=1):console.error("cannot decode "+a);else b+=1;var f=new Uint8Array(c),g=0;for(b=0;b<a.length;)if("\n"!=a[b])if(x(a[b])){var h=p(a[b]);b+=1,f[g]=h[0],f[g+1]=h[1],g+=2}else if(b+1<a.length){var d=a[b];for(b+=1;"\n"==a[b];)b+=1;var e=a[b];b+=1,h=A(d,e);for(var i=0;i<h.length;i++)f[g+i]=h[i];g+=h.length}else if(y(a[b])){var j=o(a[b]);b+=1,f[g]=j,g++}else console.error("cannot decode "+a);else b+=1;return f},D=function(a){for(var b=C(a),c="",d=0;d<b.length;d++)c+=String.fromCharCode(b[d]);return decodeURIComponent(escape(c))},E=function(a){for(var b=[],c=0;c<a.length;c++){var d=a.charCodeAt(c);d<128?b.push(d):d<2048?b.push(192|d>>6,128|63&d):d<55296||d>=57344?b.push(224|d>>12,128|d>>6&63,128|63&d):(c++,d=65536+((1023&d)<<10|1023&a.charCodeAt(c)),b.push(240|d>>18,128|d>>12&63,128|d>>6&63,128|63&d))}return B(b)};return{encode:B,decode:C,encodeString:E,decodeString:D,two_unichr_to_repeat_byte_ntimes:k,unichr_12a_from_two_ascii:l,unichr_08_from_int:m,unichr_12_from_int:n,int_from_u08b:o,two_bytes_from_u12a:p,int_from_u12b:q,two_twelve_bits_values_from_three_bytes:r,three_bytes_from_two_twelve_bits_values:s,number_of_left_instances_from_index:t,three_bytes_from_unichars:u,repeated_bytes_from_unichars:v,two_bytes_from_unichars:w,is_in_U12a:x,is_in_U8b:y,is_in_U12b:z,bytes_from_u1_u2:A,U8_start:h,U8_length:j,U12b_start:f,U12b_length:g}}();
 
 /*
-CryptoJS v3.1.2 
+CryptoJS v3.1.2
 code.google.com/p/crypto-js
 (c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
@@ -39,54 +39,55 @@ b.keySize,b.ivSize);l.iv=d.iv;b=a.encrypt.call(this,b,c,d.key,l);b.mixIn(d);retu
 8&255]]^n[l[k&255]]},encryptBlock:function(a,b){this._doCryptBlock(a,b,this._keySchedule,t,r,w,v,l)},decryptBlock:function(a,c){var d=a[c+1];a[c+1]=a[c+3];a[c+3]=d;this._doCryptBlock(a,c,this._invKeySchedule,b,x,q,n,s);d=a[c+1];a[c+1]=a[c+3];a[c+3]=d},_doCryptBlock:function(a,b,c,d,e,j,l,f){for(var m=this._nRounds,g=a[b]^c[0],h=a[b+1]^c[1],k=a[b+2]^c[2],n=a[b+3]^c[3],p=4,r=1;r<m;r++)var q=d[g>>>24]^e[h>>>16&255]^j[k>>>8&255]^l[n&255]^c[p++],s=d[h>>>24]^e[k>>>16&255]^j[n>>>8&255]^l[g&255]^c[p++],t=
 d[k>>>24]^e[n>>>16&255]^j[g>>>8&255]^l[h&255]^c[p++],n=d[n>>>24]^e[g>>>16&255]^j[h>>>8&255]^l[k&255]^c[p++],g=q,h=s,k=t;q=(f[g>>>24]<<24|f[h>>>16&255]<<16|f[k>>>8&255]<<8|f[n&255])^c[p++];s=(f[h>>>24]<<24|f[k>>>16&255]<<16|f[n>>>8&255]<<8|f[g&255])^c[p++];t=(f[k>>>24]<<24|f[n>>>16&255]<<16|f[g>>>8&255]<<8|f[h&255])^c[p++];n=(f[n>>>24]<<24|f[g>>>16&255]<<16|f[h>>>8&255]<<8|f[k&255])^c[p++];a[b]=q;a[b+1]=s;a[b+2]=t;a[b+3]=n},keySize:8});u.AES=p._createHelper(d)})();
 
-var DecryptEffect = function () {
-	var defaultOptions = {
-	duration:      1000,
-	stepsPerGlyph: 10,
-	codeGlyphs:    "ABCDEFGHIJKLMNOPQRSTUWVXYZ1234567890",
-	className:     "code"
-	};
+// var DecryptEffect = function () {
+// 	var defaultOptions = {
+// 	duration:      1000,
+// 	stepsPerGlyph: 10,
+// 	codeGlyphs:    "ABCDEFGHIJKLMNOPQRSTUWVXYZ1234567890",
+// 	className:     "code"
+// 	};
 
-	var randomString = function(set, length) {
-		var string = "", i, glyph;
-		for(i = 0 ; i < length ; i++) {
-			glyph = Math.random() * set.length;
-			string += set[glyph | 0];
-		}
-		return string;
-	}
+// 	var randomString = function(set, length) {
+// 		var string = "", i, glyph;
+// 		for(i = 0 ; i < length ; i++) {
+// 			glyph = Math.random() * set.length;
+// 			string += set[glyph | 0];
+// 		}
+// 		return string;
+// 	}
 
-	var animate = function(element, options) {
-		var text = element.text(),
-		span = $("<span/>").addClass(options.className).insertAfter(element),
-		interval = options.duration / (text.length * options.stepsPerGlyph),
-		step = 0,
-		length = 0,
-		stepper = function () {
-			if(++step % options.stepsPerGlyph === 0) {
-				length++;
-				element.text(text.slice(0, length));
-			}
-			if(length <= text.length) {
-				span.text(this.randomString(options.codeGlyphs, text.length - length));
-				setTimeout(stepper, interval);
-			} else {
-				span.remove();
-			}
-		};
-		element.text("");
-		stepper();
-	}
+// 	var animate = function(element, options) {
+// 		var text = element.text(),
+// 		span = $("<span/>").addClass(options.className).insertAfter(element),
+// 		interval = options.duration / (text.length * options.stepsPerGlyph),
+// 		step = 0,
+// 		length = 0,
+// 		stepper = function () {
+// 			if(++step % options.stepsPerGlyph === 0) {
+// 				length++;
+// 				element.text(text.slice(0, length));
+// 			}
+// 			if(length <= text.length) {
+// 				span.text(this.randomString(options.codeGlyphs, text.length - length));
+// 				setTimeout(stepper, interval);
+// 			} else {
+// 				span.remove();
+// 			}
+// 		};
+// 		element.text("");
+// 		stepper();
+// 	}
 
-	return {
-			randomString: randomString,
-			animate: animate
-		};
-}();
+// 	return {
+// 			randomString: randomString,
+// 			animate: animate
+// 		};
+// }();
 
 var discrypt = function () {};
 
-var DecryptData, EncryptData, KeysListener, DecryptMessage, EncryptionKey;
+var DecryptData, EncryptData, KeysListener, DecryptMessage, UpdateSettings;
+var PublicKey;
 
 function DecryptData( Data, Key ){
 	var Data;
@@ -107,8 +108,8 @@ function EncryptData( Data, Key ){
 function KeysListener( Event ){
 	if( Event.keyCode == 13 ){
 		var Message = $( this ).val();
-		if( Message.startsWith( "^ " ) ){
-			$( this ).val(  "Discrypt:" + EncryptData( Message.slice(2), "nigga2" ) );
+		if( Message.startsWith( "^" ) ){
+			$( this ).val(  "Discrypt:" + EncryptData( Message.slice(1), PublicKey ) );
 		}
 	}
 }
@@ -116,50 +117,94 @@ function KeysListener( Event ){
 function DecryptMessage( Element ){
 	var Message = $(Element).text();
 	if( Message.startsWith( "Discrypt:" ) ){
-		console.log( Message );
-		$(Element).text( DecryptData( Message.slice(9), "nigga2" ) );
-		$(Element).css( "color", "lightgreen" );
+		console.log( PublicKey );
+		try {
+			var Data = DecryptData( Message.slice(9), PublicKey );
+		}catch( Error ){
+			var Data = "";
+		}
+		if( Data.length > 0 ){
+			$(Element).text( Data );
+			$(Element).css( "color", "lightgreen" );
+		}else{
+			$(Element).css( "color", "#FF8080" );
+		}
 		//DecryptEffect.animate( $(Element) );
 	}
 }
 
+function UpdateSettings(){
+	PublicKey = bdPluginStorage.get( "discrypt", "discrypt-key-public" );
+}
+
+var MessageSelector = ".message-text>.markup>.message-content, .message-text>.markup";
+
 discrypt.prototype.onMessage = function () {
-	DecryptMessage( $(".message-text>.markup>.message-content, .message-text>.markup").last() );
-	setInterval( function(){ DecryptMessage( $(".message-text>.markup>.message-content, .message-text>.markup").last() ); } , 1000 );
-	setInterval( function(){ DecryptMessage( $(".message-text>.markup>.message-content, .message-text>.markup").last() ); } , 5000 );
+	DecryptMessage( $(MessageSelector).last() );
+	setInterval( function(){ DecryptMessage( $(MessageSelector).last() ); } , 1000 );
+	setInterval( function(){ DecryptMessage( $(MessageSelector).last() ); } , 5000 );
 };
 
 discrypt.prototype.onSwitch = function () {
 	$(".flex-vertical form textarea").keydown( KeysListener );
-	$(".message-text>.markup>.message-content, .message-text>.markup").each( function( N, Element ){ DecryptMessage( Element ) } );
+	$(MessageSelector).each( function( N, Element ){ DecryptMessage( Element ) } );
 };
 
-
-
-
 discrypt.prototype.start = function () {
+	UpdateSettings();
 	$(".flex-vertical form textarea").keydown( KeysListener );
-	$(".message-text>.markup>.message-content, .message-text>.markup").each( function( N, Element ){ DecryptMessage( Element ) } );
+	$(MessageSelector).each( function( N, Element ){ DecryptMessage( Element ) } );
 };
 
 discrypt.prototype.load = function () {
-
+	UpdateSettings();
 };
 
-discrypt.prototype.unload = function () {}
-;
+discrypt.prototype.unload = function () {
+
+};
 
 discrypt.prototype.stop = function () {
 
 };
-
 
 discrypt.prototype.observer = function (e) {
 	//raw MutationObserver event for each mutation
 };
 
 discrypt.prototype.getSettingsPanel = function () {
-	return "<h3>Settings Panel</h3>";
+	var Settings = "";
+
+		Settings += "<style>";
+			//Settings += "input.discrypt-settings{ width: 100% !important; marging-bottom: 10px !important; height: 30px !important; font-size: 30px !important; }";
+			//Settings += "button.discrypt-settings{ padding: 10px 20px !important;   }";
+		Settings += "</style>";
+		
+		Settings += "<div class=\"settings\">";
+			//Settings += "<div class=\"tab-bar-header\">Discrypt Settings</div>";
+			Settings += "<form class=\"form\">";
+				Settings += "<div class=\"control-group\">";
+					Settings += "<label for=\"discrypt-key-public\">Public Key</label>";
+					Settings += $( "<input type=\"text\" class=\"discrypt-settings\" id=\"discrypt-key-public\">" ).attr( "value", bdPluginStorage.get( "discrypt", "discrypt-key-public" ) )[0].outerHTML;
+				Settings += "</div>";
+				//Settings += "<h2>Private Keys</h2>";
+				//Settings += "wip<br>";
+				Settings += "<div class=\"settings-actions\">";
+					Settings += "<button type=\"button\" class=\"btn btn-primary discrypt-settings\" onclick=\"discrypt.prototype.save();\">Save</button>";
+				Settings += "</div>";
+			Settings += "</form>";
+		Settings += "</div>";
+
+	return Settings;
+};
+
+discrypt.prototype.save = function () {
+	$( ".discrypt-settings" ).each( function( N, Element ){
+		var Element = $( Element );
+		bdPluginStorage.set( "discrypt", Element.attr('id'), Element.val() );
+	} );
+	$("#bd-psm-id").remove();
+	UpdateSettings();
 };
 
 discrypt.prototype.getName = function () {
@@ -167,11 +212,11 @@ discrypt.prototype.getName = function () {
 };
 
 discrypt.prototype.getDescription = function () {
-	return "Send and receive encrypted messages. AES n' shit.";
+	return "Send and receive encrypted messages. AES n' shit.<br><br>AES-256 CBC PKCS7/PKCS5, if it tells you anything.";
 };
 
 discrypt.prototype.getVersion = function () {
-	return "0.1";
+	return "0.2";
 };
 
 discrypt.prototype.getAuthor = function () {
